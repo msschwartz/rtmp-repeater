@@ -1,99 +1,107 @@
 const express = require('express');
 const http = require('http');
 const url = require('url');
-const WebSocket = require('ws');
 const moment = require('moment');
 const ffmpeg = require('fluent-ffmpeg');
 const bodyParser = require('body-parser')
+const shortid = require('shortid');
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+
+const streams = {};
 
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.static('public'));
 
-function broadcast(data) {
-  wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
-    }
-  });
+const onstart = key => command => console.log(command);
+
+const onprogress = key => info => {
+  console.log('onprogress (' + key + ')', JSON.stringify(info));
+  if (streams[key]) {
+    streams[key].currentFps = info.currentFps;
+    streams[key].currentKbps = info.currentKbps;
+    streams[key].timemark = info.timemark; // moment.duration(info.timemark).seconds();
+  }
 };
 
-wss.on('connection', function connection(ws, req) {
-  ws.on('message', function(message) {
-    console.log('received: %s', message);
-  });
-  ws.on('close', function() {
-    console.log('disconnected');
-  });
-  ws.on('error', function() {
-    console.log('error');
-  });
-});
+const onend = key => () => delete streams[key];
+
+const onerror = key => error => delete streams[key];
+
+const onstderr = key => line => {};
+
+const serializeStreams = () => {
+  return Object.values(streams).map(stream => ({
+    key: stream.key,
+    source: stream.source,
+    destination: stream.destination,
+    duration: stream.duration,
+    currentFps: stream.currentFps,
+    currentKbps: stream.currentKbps,
+    timemark: stream.timemark,
+    start: stream.start,
+    end: stream.end,
+  }));
+};
 
 app.post('/', function (req, res) {
   if (!req.body.source) return res.send('missing source');
   if (!req.body.duration) return res.send('missing duration');
-  if (!req.body.destination) return res.send('missing destination');
+  if (!req.body.server) return res.send('missing server');
+  if (!req.body.stream) return res.send('missing stream');
 
-  var source = req.body.source;
-  var duration = parseInt(req.body.duration);
-  var destination = req.body.destination;
+  const source = req.body.source;
+  const duration = parseInt(req.body.duration);
+  const destination = req.body.server + '/' + req.body.stream;
+  const key = shortid.generate();
 
-  var proc = ffmpeg(source)
-    .on('progress', function(info) {
-      console.log('onprogress: ', info);
-      broadcast({
-        event: 'onprogress',
-        destination: destination,
-        currentFps: info.currentFps,
-        currentKbps: info.currentKbps,
-        timemark: info.timemark,
-        duration: duration
-      });
-    })
-    .on('start', function(commandLine) {
-      console.log('onstart: ', commandLine);
-      broadcast({
-        event: 'onprogress',
-        destination: destination,
-        currentFps: 0,
-        currentKbps: 0,
-        timemark: '00:00:00.00',
-        duration: duration
-      });
-    })
-    .on('end', function() {
-      console.log('onend');
-      broadcast({
-        event: 'onend',
-        destination: destination
-      });
-    })
-    .on('error', function(err) {
-      console.log('error: ', err);
-      broadcast({
-        event: 'onerror',
-        destination: destination,
-        error: err.message
-      });
-    })
-    .on('stderr', function(stderrLine) {
-      console.log('Stderr output: ' + stderrLine);
-    })
-    .duration(duration)
-    .videoCodec('copy')
-    .audioCodec('copy')
-    .format('flv')
-    .output(destination)
-    .run();
+  streams[key] = {
+    key,
+    source,
+    destination,
+    currentFps: 0,
+    currentKbps: 0,
+    timemark: '00:00:00.00',
+    start: Date.now(),
+    end: Date.now() + (duration * 1000),
+    command: ffmpeg()
+      .input(source)
+      .output(destination)
+      .duration(duration)
+      .native()
+      .videoCodec('copy')
+      .audioCodec('copy')
+      .format('flv')
+      .on('start', onstart(key))
+      .on('progress', onprogress(key))
+      .on('end', onend(key))
+      .on('error', onerror(key))
+      .on('stderr', onstderr(key))
+  };
 
-  res.send('ok');
+  streams[key].command.run();
+
+  res.json(serializeStreams());
+});
+
+app.get('/streams', function (req, res) {
+  res.json(serializeStreams());
+});
+
+app.delete('/streams/:key', (req, res) => {
+  const {key} = req.params;
+  if (streams[key]) {
+    try {
+      streams[key].command.kill();
+    } catch (err) {}
+    delete streams[key];
+  }
+  res.json(serializeStreams());
 });
 
 app.get('/', function (req, res) {
-   res.sendfile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 server.listen(process.env.PORT || 3000, function listening() {
