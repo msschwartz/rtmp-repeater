@@ -17,7 +17,6 @@ app.use('/images', express.static(__dirname + '/public'));
 const onstart = key => command => console.log(command);
 
 const onprogress = key => info => {
-  console.log('onprogress (' + key + ')', JSON.stringify(info));
   if (streams[key]) {
     streams[key].currentFps = info.currentFps;
     streams[key].currentKbps = info.currentKbps;
@@ -82,7 +81,8 @@ app.post('/', function (req, res) {
 
   streams[key].command.run();
 
-  res.json(serializeStreams());
+  res.writeHead(302, {'Location': '/'});
+  res.end();
 });
 
 app.get('/streams', function (req, res) {
