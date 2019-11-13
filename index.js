@@ -14,7 +14,9 @@ const streams = {};
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/images', express.static(__dirname + '/public'));
 
-const onstart = key => command => console.log(command);
+const onstart = key => command => {
+  console.log(key, command);
+};
 
 const onprogress = key => info => {
   if (streams[key]) {
@@ -24,11 +26,18 @@ const onprogress = key => info => {
   }
 };
 
-const onend = key => () => delete streams[key];
+const onend = key => () => {
+  delete streams[key];
+};
 
-const onerror = key => error => delete streams[key];
+const onerror = key => error => {
+  delete streams[key];
+  console.log(key, error);
+};
 
-const onstderr = key => line => {};
+const onstderr = key => line => {
+  console.log(key, line);
+};
 
 const serializeStreams = () => {
   return Object.values(streams).map(stream => ({
