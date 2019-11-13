@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const streams = {};
 
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(express.static('public'));
+app.use('/images', express.static(__dirname + '/public'));
 
 const onstart = key => command => console.log(command);
 
