@@ -110,17 +110,23 @@ app.delete('/streams/:key', (req, res) => {
 });
 
 app.get('/notify', function(req, res) {
-  console.log('notify: ', JSON.stringify(req.params), JSON.stringify(req.body), JSON.stringify(req.query));
-  res.send('ok');
+  // req.query = {
+  //   "app": "ingest",
+  //   "flashver": "",
+  //   "swfurl": "",
+  //   "tcurl": "rtmp://rtmp.abnsat.com/ingest",
+  //   "pageurl": "",
+  //   "addr": "107.4.90.242",
+  //   "clientid": "221",
+  //   "call": "publish",
+  //   "name": "msstest",
+  //   "type": "live"
+  // }
+  res.status(200).send('OK');
 });
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
-});
-
-app.get('*', function(req, res) {
-  console.log('not found: ', JSON.stringify(req.params), JSON.stringify(req.body), JSON.stringify(req.query));
-  res.send('ok');
 });
 
 server.listen(process.env.PORT || 3000, function listening() {

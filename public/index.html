@@ -109,11 +109,14 @@
                 <form action="/" id="start_stream" method="post">
                   <div class="form-group">
                     <label>Source</label>
-                    <select name="source" class="form-control">
-                        <option value="rtmp://rtmp.abnsat.com/live/arabic">arabic</option>
-                        <option value="rtmp://rtmp.abnsat.com/live/trinity">trinity</option>
-                        <option value="rtmp://rtmp.abnsat.com/live/nilesat">nilesat</option>
-                    </select>
+                    <input name="source" class="form-control" required>
+                    <p class="help-block">
+                        <ul>
+                            <li>rtmp://rtmp.abnsat.com/live/arabic</li>
+                            <li>rtmp://rtmp.abnsat.com/live/trinity</li>
+                            <li>rtmp://rtmp.abnsat.com/live/nilesat</li>
+                        </ul>
+                    </p>
                   </div>
                   <div class="form-group">
                     <label>Server URL</label>
