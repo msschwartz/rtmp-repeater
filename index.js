@@ -109,27 +109,12 @@ app.delete('/streams/:key', (req, res) => {
   res.json(serializeStreams());
 });
 
-app.post('/on_publish', function (req, res) {
-  console.log('on_publish: ', JSON.stringify(req.body));
-  res.send('ok');
-});
-
-app.post('/on_publish_done', function (req, res) {
-  console.log('on_publish_done: ', JSON.stringify(req.body));
-  res.send('ok');
-});
-
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 });
 
 app.get('*', function(req, res) {
-  console.log('not found get: ', JSON.stringify(req.body));
-  res.send('ok');
-});
-
-app.post('*', function(req, res) {
-  console.log('not found post: ', JSON.stringify(req.body));
+  console.log('not found: ', JSON.stringify(req.params), JSON.stringify(req.body), JSON.stringify(req.query));
   res.send('ok');
 });
 
