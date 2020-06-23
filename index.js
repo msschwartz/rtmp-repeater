@@ -109,6 +109,11 @@ app.delete('/streams/:key', (req, res) => {
   res.json(serializeStreams());
 });
 
+app.get('/notify', function(req, res) {
+  console.log('notify: ', JSON.stringify(req.params), JSON.stringify(req.body), JSON.stringify(req.query));
+  res.send('ok');
+});
+
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 });
