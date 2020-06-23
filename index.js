@@ -109,10 +109,22 @@ app.delete('/streams/:key', (req, res) => {
   res.json(serializeStreams());
 });
 
+app.post('/on_publish', function (req, res) {
+  console.log('on_publish: ', req.body);
+  res.send('ok');
+});
+
+app.post('/on_publish_done', function (req, res) {
+  console.log('on_publish_done: ', req.body);
+  res.send('ok');
+});
+
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 });
 
 server.listen(process.env.PORT || 3000, function listening() {
   console.log('Listening on %d', server.address().port);
+
+  // TODO restart nginx so we capture publish events
 });
