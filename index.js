@@ -13,22 +13,22 @@ const staticStreams = {
   arabic: {
     primary: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir28a",
     backup: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir289",
-    destination: "rtmp://rtmp.abnsat.com/live/arabic",
+    destination: "rtmp://localhost/live/arabic",
   },
   nilesat: {
     primary: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir28a",
     backup: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir289",
-    destination: "rtmp://rtmp.abnsat.com/live/nilesat",
+    destination: "rtmp://localhost/live/nilesat",
   },
   trinity: {
     primary: "rtmp://rtmp.abnsat.com/ingest/zehkcgjtbdblut0a",
     backup: "rtmp://rtmp.abnsat.com/ingest/zehkcgjtbdblut09",
-    destination: "rtmp://rtmp.abnsat.com/live/trinity",
+    destination: "rtmp://localhost/live/trinity",
   },
   abnsama: {
     primary: "rtmp://rtmp.abnsat.com/ingest/wxpkr2rgbfjqvdaa",
     backup: "rtmp://rtmp.abnsat.com/ingest/wxpkr2rgbfjqvda9",
-    destination: "rtmp://rtmp.abnsat.com/live/abnsama",
+    destination: "rtmp://localhost/live/abnsama",
   },
 };
 
@@ -59,7 +59,7 @@ const onerror = key => error => {
 };
 
 const onstderr = key => line => {
-  console.log(key, line);
+  // console.log(key, line);
 };
 
 const serializeStreams = () => {
@@ -154,21 +154,21 @@ app.get('/notify', function(req, res) {
     const backupKey = `${key}-backup`;
     const duration = 31536000; // 1 year
     if (call === 'publish' && url === stream.primary) {
-      // kill backup, start primary
+      console.log(key, 'kill backup, start primary');
       killStream(backupKey);
       startStream(primaryKey, stream.primary, duration, stream.destination);
     }
     if (call === 'publish' && url === stream.backup && !streams[primaryKey]) {
-      // if primary does not exist, start backup
+      console.log(key, 'if primary does not exist, start backup');
       startStream(backupKey, stream.backup, duration, stream.destination);
     }
     if (call === 'publish_done' && url === stream.primary) {
-      // kill primary, start backup
+      console.log(key, 'kill primary, start backup');
       killStream(primaryKey);
       startStream(backupKey, stream.backup, duration, stream.destination);
     }
     if (call === 'publish_done' && url === stream.backup) {
-      // kill backup
+      console.log(key, 'kill backup');
       killStream(backupKey);
     }
   });
