@@ -9,6 +9,29 @@ const shortid = require('shortid');
 const app = express();
 const server = http.createServer(app);
 
+const staticStreams = {
+  arabic: {
+    primary: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir28a",
+    backup: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir289",
+    destination: "rtmp://rtmp.abnsat.com/live/arabic",
+  },
+  nilesat: {
+    primary: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir28a",
+    backup: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir289",
+    destination: "rtmp://rtmp.abnsat.com/live/nilesat",
+  },
+  trinity: {
+    primary: "rtmp://rtmp.abnsat.com/ingest/zehkcgjtbdblut0a",
+    backup: "rtmp://rtmp.abnsat.com/ingest/zehkcgjtbdblut09",
+    destination: "rtmp://rtmp.abnsat.com/live/trinity",
+  },
+  abnsama: {
+    primary: "rtmp://rtmp.abnsat.com/ingest/wxpkr2rgbfjqvdaa",
+    backup: "rtmp://rtmp.abnsat.com/ingest/wxpkr2rgbfjqvda9",
+    destination: "rtmp://rtmp.abnsat.com/live/abnsama",
+  },
+};
+
 const streams = {};
 
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -53,17 +76,7 @@ const serializeStreams = () => {
   }));
 };
 
-app.post('/', function (req, res) {
-  if (!req.body.source) return res.send('missing source');
-  if (!req.body.duration) return res.send('missing duration');
-  if (!req.body.server) return res.send('missing server');
-  if (!req.body.stream) return res.send('missing stream');
-
-  const source = req.body.source;
-  const duration = parseInt(req.body.duration);
-  const destination = req.body.server + '/' + req.body.stream;
-  const key = shortid.generate();
-
+const startStream = (key, source, duration, destination) => {
   streams[key] = {
     key,
     source,
@@ -89,6 +102,20 @@ app.post('/', function (req, res) {
   };
 
   streams[key].command.run();
+};
+
+app.post('/', function (req, res) {
+  if (!req.body.source) return res.send('missing source');
+  if (!req.body.duration) return res.send('missing duration');
+  if (!req.body.server) return res.send('missing server');
+  if (!req.body.stream) return res.send('missing stream');
+
+  const key = shortid.generate();
+  const source = req.body.source;
+  const duration = parseInt(req.body.duration);
+  const destination = req.body.server + '/' + req.body.stream;
+
+  startStream(key, source, duration, destination);
 
   res.writeHead(302, {'Location': '/'});
   res.end();
@@ -98,30 +125,54 @@ app.get('/streams', function (req, res) {
   res.json(serializeStreams());
 });
 
-app.delete('/streams/:key', (req, res) => {
-  const {key} = req.params;
+const killStream = key => {
   if (streams[key]) {
     try {
       streams[key].command.kill();
-    } catch (err) {}
+    } catch (err) {
+      console.warn('failed to kill stream', err);
+    }
     delete streams[key];
   }
+}
+
+app.delete('/streams/:key', (req, res) => {
+  const {key} = req.params;
+  killStream(key);
   res.json(serializeStreams());
 });
 
 app.get('/notify', function(req, res) {
-  // req.query = {
-  //   "app": "ingest",
-  //   "flashver": "",
-  //   "swfurl": "",
-  //   "tcurl": "rtmp://rtmp.abnsat.com/ingest",
-  //   "pageurl": "",
-  //   "addr": "107.4.90.242",
-  //   "clientid": "221",
-  //   "call": "publish",
-  //   "name": "msstest",
-  //   "type": "live"
-  // }
+  console.log('notify', JSON.stringify(req.query));
+  
+  const {call, tcurl, name} = req.query;
+  const url = `${tcurl}/${name}`;
+
+  Object.keys(staticStreams).forEach(key => {
+    const stream = staticStreams[key];
+    const primaryKey = `${key}-primary`;
+    const backupKey = `${key}-backup`;
+    const duration = 31536000; // 1 year
+    if (call === 'publish' && url === stream.primary) {
+      // kill backup, start primary
+      killStream(backupKey);
+      startStream(primaryKey, stream.primary, duration, stream.destination);
+    }
+    if (call === 'publish' && url === stream.backup && !streams[primaryKey]) {
+      // if primary does not exist, start backup
+      startStream(backupKey, stream.backup, duration, stream.destination);
+    }
+    if (call === 'publish_done' && url === stream.primary) {
+      // kill primary, start backup
+      killStream(primaryKey);
+      startStream(backupKey, stream.backup, duration, stream.destination);
+    }
+    if (call === 'publish_done' && url === stream.backup) {
+      // kill backup
+      killStream(backupKey);
+    }
+  });
+
   res.status(200).send('OK');
 });
 
