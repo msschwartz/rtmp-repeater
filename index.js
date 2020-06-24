@@ -9,28 +9,28 @@ const shortid = require('shortid');
 const app = express();
 const server = http.createServer(app);
 
-const staticStreams = {
-  arabic: {
-    primary: "v1zos2fgbhrir28a",
-    backup: "v1zos2fgbhrir289",
-    destination: "rtmp://localhost/live/arabic",
-  },
-  nilesat: {
-    primary: "v1zos2fgbhrir28a",
-    backup: "v1zos2fgbhrir289",
-    destination: "rtmp://localhost/live/nilesat",
-  },
-  trinity: {
-    primary: "zehkcgjtbdblut0a",
-    backup: "zehkcgjtbdblut09",
-    destination: "rtmp://localhost/live/trinity",
-  },
-  abnsama: {
-    primary: "wxpkr2rgbfjqvdaa",
-    backup: "wxpkr2rgbfjqvda9",
-    destination: "rtmp://localhost/live/abnsama",
-  },
-};
+// const staticStreams = {
+//   arabic: {
+//     primary: "v1zos2fgbhrir28a",
+//     backup: "v1zos2fgbhrir289",
+//     destination: "rtmp://localhost/live/arabic",
+//   },
+//   nilesat: {
+//     primary: "v1zos2fgbhrir28a",
+//     backup: "v1zos2fgbhrir289",
+//     destination: "rtmp://localhost/live/nilesat",
+//   },
+//   trinity: {
+//     primary: "zehkcgjtbdblut0a",
+//     backup: "zehkcgjtbdblut09",
+//     destination: "rtmp://localhost/live/trinity",
+//   },
+//   abnsama: {
+//     primary: "wxpkr2rgbfjqvdaa",
+//     backup: "wxpkr2rgbfjqvda9",
+//     destination: "rtmp://localhost/live/abnsama",
+//   },
+// };
 
 const streams = {};
 
@@ -145,33 +145,33 @@ app.delete('/streams/:key', (req, res) => {
 app.get('/notify', function(req, res) {
   console.log('notify', JSON.stringify(req.query));
   
-  const {call, tcurl, name} = req.query;
-  const url = `rtmp://localhost/ingest/${name}`;
+  // const {call, tcurl, name} = req.query;
+  // const url = `rtmp://localhost/ingest/${name}`;
 
-  Object.keys(staticStreams).forEach(key => {
-    const stream = staticStreams[key];
-    const primaryKey = `${key}-primary`;
-    const backupKey = `${key}-backup`;
-    const duration = 31536000; // 1 year
-    if (call === 'publish' && name === stream.primary) {
-      console.log(key, 'kill backup, start primary');
-      killStream(backupKey);
-      startStream(primaryKey, url, duration, stream.destination);
-    }
-    if (call === 'publish' && name === stream.backup && !streams[primaryKey]) {
-      console.log(key, 'if primary does not exist, start backup');
-      startStream(backupKey, url, duration, stream.destination);
-    }
-    if (call === 'publish_done' && name === stream.primary) {
-      console.log(key, 'kill primary, start backup');
-      killStream(primaryKey);
-      startStream(backupKey, url, duration, stream.destination);
-    }
-    if (call === 'publish_done' && name === stream.backup) {
-      console.log(key, 'kill backup');
-      killStream(backupKey);
-    }
-  });
+  // Object.keys(staticStreams).forEach(key => {
+  //   const stream = staticStreams[key];
+  //   const primaryKey = `${key}-primary`;
+  //   const backupKey = `${key}-backup`;
+  //   const duration = 31536000; // 1 year
+  //   if (call === 'publish' && name === stream.primary) {
+  //     console.log(key, 'kill backup, start primary');
+  //     killStream(backupKey);
+  //     startStream(primaryKey, url, duration, stream.destination);
+  //   }
+  //   if (call === 'publish' && name === stream.backup && !streams[primaryKey]) {
+  //     console.log(key, 'if primary does not exist, start backup');
+  //     startStream(backupKey, url, duration, stream.destination);
+  //   }
+  //   if (call === 'publish_done' && name === stream.primary) {
+  //     console.log(key, 'kill primary, start backup');
+  //     killStream(primaryKey);
+  //     startStream(backupKey, url, duration, stream.destination);
+  //   }
+  //   if (call === 'publish_done' && name === stream.backup) {
+  //     console.log(key, 'kill backup');
+  //     killStream(backupKey);
+  //   }
+  // });
 
   res.status(200).send('OK');
 });
