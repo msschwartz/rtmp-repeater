@@ -11,23 +11,23 @@ const server = http.createServer(app);
 
 const staticStreams = {
   arabic: {
-    primary: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir28a",
-    backup: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir289",
+    primary: "v1zos2fgbhrir28a",
+    backup: "v1zos2fgbhrir289",
     destination: "rtmp://localhost/live/arabic",
   },
   nilesat: {
-    primary: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir28a",
-    backup: "rtmp://rtmp.abnsat.com/ingest/v1zos2fgbhrir289",
+    primary: "v1zos2fgbhrir28a",
+    backup: "v1zos2fgbhrir289",
     destination: "rtmp://localhost/live/nilesat",
   },
   trinity: {
-    primary: "rtmp://rtmp.abnsat.com/ingest/zehkcgjtbdblut0a",
-    backup: "rtmp://rtmp.abnsat.com/ingest/zehkcgjtbdblut09",
+    primary: "zehkcgjtbdblut0a",
+    backup: "zehkcgjtbdblut09",
     destination: "rtmp://localhost/live/trinity",
   },
   abnsama: {
-    primary: "rtmp://rtmp.abnsat.com/ingest/wxpkr2rgbfjqvdaa",
-    backup: "rtmp://rtmp.abnsat.com/ingest/wxpkr2rgbfjqvda9",
+    primary: "wxpkr2rgbfjqvdaa",
+    backup: "wxpkr2rgbfjqvda9",
     destination: "rtmp://localhost/live/abnsama",
   },
 };
@@ -146,28 +146,28 @@ app.get('/notify', function(req, res) {
   console.log('notify', JSON.stringify(req.query));
   
   const {call, tcurl, name} = req.query;
-  const url = `${tcurl}/${name}`;
+  const url = `rtmp://localhost/ingest/${name}`;
 
   Object.keys(staticStreams).forEach(key => {
     const stream = staticStreams[key];
     const primaryKey = `${key}-primary`;
     const backupKey = `${key}-backup`;
     const duration = 31536000; // 1 year
-    if (call === 'publish' && url === stream.primary) {
+    if (call === 'publish' && name === stream.primary) {
       console.log(key, 'kill backup, start primary');
       killStream(backupKey);
-      startStream(primaryKey, stream.primary, duration, stream.destination);
+      startStream(primaryKey, url, duration, stream.destination);
     }
-    if (call === 'publish' && url === stream.backup && !streams[primaryKey]) {
+    if (call === 'publish' && name === stream.backup && !streams[primaryKey]) {
       console.log(key, 'if primary does not exist, start backup');
-      startStream(backupKey, stream.backup, duration, stream.destination);
+      startStream(backupKey, url, duration, stream.destination);
     }
-    if (call === 'publish_done' && url === stream.primary) {
+    if (call === 'publish_done' && name === stream.primary) {
       console.log(key, 'kill primary, start backup');
       killStream(primaryKey);
-      startStream(backupKey, stream.backup, duration, stream.destination);
+      startStream(backupKey, url, duration, stream.destination);
     }
-    if (call === 'publish_done' && url === stream.backup) {
+    if (call === 'publish_done' && name === stream.backup) {
       console.log(key, 'kill backup');
       killStream(backupKey);
     }
@@ -185,3 +185,6 @@ server.listen(process.env.PORT || 3000, function listening() {
 
   // TODO restart nginx so we capture publish events
 });
+
+// notify {"app":"ingest","flashver":"","swfurl":"","tcurl":"rtmp://rtmp1.abnsat.com/ingest","pageurl":"","addr":"107.1.139.34","clientid":"1","call":"publish","name":"v1zos2fgbhrir289","type":"live"}
+// notify {"app":"ingest","flashver":"TelVue TeleCast 2/2.1.0 FMLE/3.","swfurl":"","tcurl":"rtmp://rtmp.abnsat.com:1935/ingest/","pageurl":"","addr":"12.201.46.14","clientid":"66","call":"publish","name":"vtbkr2rhrlhvvda9","type":"live"}
