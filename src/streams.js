@@ -48,8 +48,8 @@ const startStream = (source, destination) => {
         timemark: '00:00:00.00',
         start: Date.now(),
         command: ffmpeg()
-            .native()
             .input(source)
+            .native()
             .output(destination)
             .videoCodec('copy')
             .audioCodec('copy')
