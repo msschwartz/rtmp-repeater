@@ -68,10 +68,12 @@ app.get('/notify', async function(req, res) {
 
     // if primary, kill backup and start primary
     if (call === 'publish' && isPrimary) {
+        monitor.stop();
         if (existingStream) {
             await stopStream(existingStream.key);
         }
         startStream(primary, destination);
+        monitor.start();
     }
 
     // if backup, ignore
@@ -81,10 +83,12 @@ app.get('/notify', async function(req, res) {
 
     // if primary, kill primary (if exists) and start backup
     if (call === 'publish_done' && isPrimary) {
+        monitor.stop();
         if (existingStream) {
             await stopStream(existingStream.key);
         }
         startStream(backup, destination);
+        monitor.start();
     }
 
     // if backup, kill backup
@@ -112,7 +116,7 @@ app.get('/', function (req, res) {
 server.listen(process.env.PORT || 3000, function listening() {
     console.log('Listening on %d', server.address().port);
 
-    monitor.init();
+    monitor.start();
 
     // TODO restart nginx so we capture publish events
 });

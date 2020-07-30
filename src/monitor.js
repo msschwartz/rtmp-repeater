@@ -12,7 +12,11 @@ const CHECK_INTERVAL = 30000;
 // if primary ends, kill primary and start backup
 // if backup fails, restry in 10 seconds
 
+let timer = null;
+
 const checkStreams = () => {
+    clearTimeout(timer);
+
     const streams = getStreams();
 
     config.forEach(c => {
@@ -22,13 +26,18 @@ const checkStreams = () => {
         }
     });
 
-    setTimeout(checkStreams, CHECK_INTERVAL);
+    timer = setTimeout(checkStreams, CHECK_INTERVAL);
 };
 
-const init = () => {
-    checkStreams();
+const start = () => {
+    timer = setTimeout(checkStreams, 1000);
+};
+
+const stop = () => {
+    clearTimeout(timer);
 };
 
 module.exports = {
-    init,
+    start,
+    stop,
 };

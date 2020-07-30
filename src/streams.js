@@ -92,6 +92,12 @@ const stopStream = async key => {
 
         console.log('dropping publisher');
         await axios.get(`http://localhost/control/drop/publisher?app=${app}&name=${name}`);
+
+        console.log('dropping clients');
+        await axios.get(`http://localhost/control/drop/client?app=${app}&name=${name}`);
+
+        console.log('dropping subscribers');
+        await axios.get(`http://localhost/control/drop/subscriber?app=${app}&name=${name}`);
     }
 };
 
