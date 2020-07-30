@@ -54,11 +54,15 @@ app.get('/notify', async function(req, res) {
         return;
     }
 
+    console.log('found config', cfg);
+
     const {primary, backup, destination} = cfg;
 
     const existingStream = getStreams().find(
         s => primary.indexOf(name) !== -1 || backup.indexOf(name) !== -1
     );
+
+    console.log('found stream', existingStream);
 
     const isPrimary = primary.indexOf(name) !== -1;
 
