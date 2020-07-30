@@ -1,6 +1,7 @@
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
 const shortid = require('shortid');
+const axios = require('axios');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -29,7 +30,7 @@ const onerror = key => error => {
 };
 
 const onstderr = key => line => {
-    console.log(key, line);
+    // console.log(key, line);
 };
 
 const getStreams = () => Object.values(streams);
@@ -74,14 +75,23 @@ function sleep(ms) {
 
 const stopStream = async key => {
     console.log(`stopping stream ${key}`);
-    try {
-        streams[key].command.kill();
-    } catch (err) {
-        console.error('failed to kill stream', err);
-    }
-    while (streams[key]) {
-        console.log('sleeping...');
-        await sleep(500);
+
+    if (streams[key]) {
+        const [app, name] = streams[key].destination.split('/').slice(-2);
+
+        try {
+            streams[key].command.kill();
+        } catch (err) {
+            console.error('failed to kill stream', err);
+        }
+
+        console.log('waiting for ffmpeg task to terminate');
+        while (streams[key]) {
+            await sleep(500);
+        }
+
+        console.log('dropping publisher');
+        await axios.get(`http://localhost/control/drop/publisher?app=${app}&name=${name}`);
     }
 };
 
