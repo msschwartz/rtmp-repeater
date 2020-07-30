@@ -19,7 +19,7 @@ const onprogress = key => info => {
 };
 
 const onend = key => () => {
-    console.error('stream ended', key);
+    console.error('stream end', key);
     delete streams[key];
 };
 
@@ -29,7 +29,7 @@ const onerror = key => error => {
 };
 
 const onstderr = key => line => {
-    // console.log(key, line);
+    console.log(key, line);
 };
 
 const getStreams = () => Object.values(streams);
@@ -48,6 +48,7 @@ const startStream = (source, destination) => {
         timemark: '00:00:00.00',
         start: Date.now(),
         command: ffmpeg()
+            .native()
             .input(source)
             .output(destination)
             .videoCodec('copy')
@@ -80,7 +81,7 @@ const stopStream = async key => {
     }
     while (streams[key]) {
         console.log('sleeping...');
-        await sleep(1000);
+        await sleep(500);
     }
 };
 

@@ -15,7 +15,7 @@ const CHECK_INTERVAL = 30000;
 const checkStreams = () => {
     const streams = getStreams();
 
-    Object.values(config).forEach(c => {
+    config.forEach(c => {
         if (!streams.some(s => s.destination === c.destination)) {
             console.log('no stream found, starting backup');
             startStream(c.backup, c.destination);

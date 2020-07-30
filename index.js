@@ -44,7 +44,7 @@ app.get('/notify', async function(req, res) {
 
     const {call, name} = req.query;
 
-    const cfg = Object.values(config).find(
+    const cfg = config.find(
         c => c.primary.indexOf(name) !== -1 || c.backup.indexOf(name) !== -1
     );
 
