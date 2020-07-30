@@ -39,7 +39,7 @@ const server = http.createServer(app);
 //   res.json(serializeStreams());
 // });
 
-app.get('/notify', function(req, res) {
+app.get('/notify', async function(req, res) {
     console.log('notify', JSON.stringify(req.query));
 
     const {call, name} = req.query;
@@ -67,7 +67,7 @@ app.get('/notify', function(req, res) {
     // if primary, kill backup and start primary
     if (call === 'publish' && isPrimary) {
         if (existingStream) {
-            stopStream(existingStream.key);
+            await stopStream(existingStream.key);
         }
         startStream(primary, destination);
     }
@@ -80,7 +80,7 @@ app.get('/notify', function(req, res) {
     // if primary, kill primary (if exists) and start backup
     if (call === 'publish_done' && isPrimary) {
         if (existingStream) {
-            stopStream(existingStream.key);
+            await stopStream(existingStream.key);
         }
         startStream(backup, destination);
     }
@@ -88,7 +88,7 @@ app.get('/notify', function(req, res) {
     // if backup, kill backup
     if (call === 'publish_done' && isBackup) {
         if (existingStream) {
-            stopStream(existingStream.key);
+            await stopStream(existingStream.key);
         }
     }
 

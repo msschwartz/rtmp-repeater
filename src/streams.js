@@ -19,6 +19,7 @@ const onprogress = key => info => {
 };
 
 const onend = key => () => {
+    console.error('stream ended', key);
     delete streams[key];
 };
 
@@ -66,14 +67,21 @@ const startStream = (source, destination) => {
     return stream;
 };
 
-const stopStream = key => {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const stopStream = async key => {
     console.log(`stopping stream ${key}`);
     try {
         streams[key].command.kill();
     } catch (err) {
         console.error('failed to kill stream', err);
     }
-    delete streams[key];
+    while (streams[key]) {
+        console.log('sleeping...');
+        await sleep(1000);
+    }
 };
 
 module.exports = {
