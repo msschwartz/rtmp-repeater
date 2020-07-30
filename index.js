@@ -50,7 +50,12 @@ app.get('/notify', function(req, res) {
 
     const {primary, backup, destination} = Object.values(config).find(
         c => c.primary.indexOf(name) !== -1 || c.backup.indexOf(name) !== -1
-    );
+    ) || {};
+
+    if (!primary || !backup || !destination) {
+        console.error('config missing');
+        res.send('OK');
+    }
 
     const isPrimary = primary.indexOf(name) !== -1;
 
