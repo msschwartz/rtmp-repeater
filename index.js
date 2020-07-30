@@ -51,6 +51,7 @@ app.get('/notify', function(req, res) {
     if (!cfg) {
         console.error('config missing');
         res.send('OK');
+        return;
     }
 
     const {primary, backup, destination} = cfg;
