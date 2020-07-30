@@ -16,18 +16,6 @@ const server = http.createServer(app);
 // app.use(bodyParser.json());
 // app.use('/images', express.static(__dirname + '/public'));
 
-app.get('/streams', function (req, res) {
-    res.json(getStreams().map(stream => ({
-        key: stream.key,
-        source: stream.source,
-        destination: stream.destination,
-        currentFps: stream.currentFps,
-        currentKbps: stream.currentKbps,
-        timemark: stream.timemark,
-        start: stream.start,
-    })));
-});
-
 // app.post('/streams', function (req, res) {
 //     if (!req.body.source) return res.send('missing source');
 //     if (!req.body.destination) return res.send('missing destination');
@@ -99,9 +87,17 @@ app.get('/notify', function(req, res) {
     res.send('OK');
 });
 
-// app.get('/', function (req, res) {
-//     res.sendFile(__dirname + '/public/index.html');
-// });
+app.get('/', function (req, res) {
+    res.json(getStreams().map(stream => ({
+        key: stream.key,
+        source: stream.source,
+        destination: stream.destination,
+        currentFps: stream.currentFps,
+        currentKbps: stream.currentKbps,
+        timemark: stream.timemark,
+        start: stream.start,
+    })));
+});
 
 server.listen(process.env.PORT || 3000, function listening() {
     console.log('Listening on %d', server.address().port);
