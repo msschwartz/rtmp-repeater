@@ -1,7 +1,7 @@
 const config = require('./config');
 const {getStreams, startStream} = require('./streams');
 
-const CHECK_INTERVAL = 10000;
+const CHECK_INTERVAL = 30000;
 
 // monitor streams:
 // check if primary is available

@@ -44,18 +44,20 @@ app.get('/notify', function(req, res) {
 
     const {call, name} = req.query;
 
-    const existingStream = getStreams().find(
-        s => s.primary.indexOf(name) !== -1 || s.backup.indexOf(name) !== -1
+    const cfg = Object.values(config).find(
+        c => c.primary.indexOf(name) !== -1 || c.backup.indexOf(name) !== -1
     );
 
-    const {primary, backup, destination} = Object.values(config).find(
-        c => c.primary.indexOf(name) !== -1 || c.backup.indexOf(name) !== -1
-    ) || {};
-
-    if (!primary || !backup || !destination) {
+    if (!cfg) {
         console.error('config missing');
         res.send('OK');
     }
+
+    const {primary, backup, destination} = cfg;
+
+    const existingStream = getStreams().find(
+        s => primary.indexOf(name) !== -1 || backup.indexOf(name) !== -1
+    );
 
     const isPrimary = primary.indexOf(name) !== -1;
 
