@@ -29,7 +29,7 @@ const checkStreams = async () => {
         if (!stream) {
             console.log('no stream found, starting backup');
             startStream(c.backup, c.destination);
-            timestamps[c.destination] = 5000; // 5 second startup time
+            timestamps[c.destination] = -5000; // 5 second startup time
         } else {
             const curr = moment.duration(stream.timemark).milliseconds();
             if (curr - timestamps[stream.destination] < CHECK_INTERVAL - 5000) {
