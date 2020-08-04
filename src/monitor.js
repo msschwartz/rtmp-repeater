@@ -1,6 +1,6 @@
 const moment = require('moment');
 const config = require('./config');
-const {getStreams, startStream} = require('./streams');
+const {getStreams, startStream, stopStream} = require('./streams');
 
 const CHECK_INTERVAL = 30000;
 
