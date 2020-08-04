@@ -15,7 +15,7 @@ const onprogress = key => info => {
     if (streams[key]) {
         streams[key].currentFps = info.currentFps;
         streams[key].currentKbps = info.currentKbps;
-        streams[key].timemark = info.timemark; // moment.duration(info.timemark).seconds();
+        streams[key].timemark = info.timemark;
     }
 };
 
