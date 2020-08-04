@@ -33,7 +33,7 @@ const checkStreams = async () => {
         } else {
             const current = moment.duration(stream.timemark).asMilliseconds();
             if (current - timestamps[stream.destination] < CHECK_INTERVAL + 5000) {
-                console.log('timemark looks stalled, restarting backup');
+                console.log('timemark looks stalled, restarting backup', current, timestamps[stream.destination]);
                 await stopStream(stream.key);
                 startStream(c.backup, c.destination);
             } else {
