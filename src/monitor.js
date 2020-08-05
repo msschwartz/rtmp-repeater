@@ -39,6 +39,7 @@ const checkStreams = async () => {
             // } else {
             //     timestamps[stream.destination] = current;
             // }
+
         }
     }
 
