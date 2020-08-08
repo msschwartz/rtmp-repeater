@@ -29,10 +29,13 @@ const checkStreams = async () => {
         if (!stream) {
             console.log('no stream found, starting backup');
             startStream(c.backup, c.destination);
-            timestamps[c.destination] = -5000; // 5 second startup time
+            timestamps[c.destination] = 0;
         } else {
             const current = moment.duration(stream.timemark).asMilliseconds();
-            if (current - timestamps[stream.destination] < CHECK_INTERVAL - 5000) {
+            if (timestamps[stream.destination] === 0) {
+                timestamps[stream.destination] = current;
+            }
+            else if (current === timestamps[stream.destination]) {
                 console.log('timemark looks stalled, restarting backup', current, timestamps[stream.destination]);
                 await stopStream(stream.key);
                 startStream(c.backup, c.destination);
