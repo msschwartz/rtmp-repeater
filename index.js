@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({path: __dirname + '/.env'});
 const express = require('express');
 const http = require('http');
 const nginx = require('./src/nginx');
