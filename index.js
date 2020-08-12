@@ -13,6 +13,20 @@ const streams = [
         primaryExec: null,
         backupConf: __dirname + '/conf/nginx-arabic-backup.conf',
         backupExec: null,
+    },
+    {
+        name: 'trinity',
+        primaryConf: __dirname + '/conf/nginx-trinity-primary.conf',
+        primaryExec: null,
+        backupConf: __dirname + '/conf/nginx-trinity-backup.conf',
+        backupExec: null,
+    },
+    {
+        name: 'abnsama',
+        primaryConf: __dirname + '/conf/nginx-abnsama-primary.conf',
+        primaryExec: null,
+        backupConf: __dirname + '/conf/nginx-abnsama-backup.conf',
+        backupExec: null,
     }
 ];
 
@@ -39,7 +53,10 @@ app.get('/notify', async function(req, res) {
                 stream.backupExec = null;
                 console.log(`starting primary stream ${stream.name}`);
                 stream.primaryExec && stream.primaryExec.kill();
-                stream.primaryExec = nginx.run(stream.primaryConf);
+                setTimeout(() => {
+                    if (stream.primaryExec) return console.error('exec already exists!');
+                    stream.primaryExec = nginx.run(stream.primaryConf);
+                }, 500);
             }
             if (call === 'publish_done') {
                 console.log(`killing primary stream ${stream.name}`);
@@ -47,7 +64,10 @@ app.get('/notify', async function(req, res) {
                 stream.primaryExec = null;
                 console.log(`starting backup stream ${stream.name}`);
                 stream.backupExec && stream.backupExec.kill();
-                stream.backupExec = nginx.run(stream.backupConf);
+                setTimeout(() => {
+                    if (stream.backupExec) return console.error('exec already exists!');
+                    stream.backupExec = nginx.run(stream.backupConf);
+                }, 500);
             }
         }
     }
