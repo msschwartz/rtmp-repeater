@@ -6,7 +6,7 @@ const nginx = require('./src/nginx');
 const app = express();
 const server = http.createServer(app);
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 
 const streams = [
@@ -84,7 +84,7 @@ app.post('/streams/:streamId/stop', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-    res.render('pages/index', {
+    res.render(__dirname + '/views/pages/index', {
         streams: streams.map(stream => ({
             id: stream.id,
             name: stream.name,
@@ -95,37 +95,4 @@ app.get('/', function (req, res) {
 
 server.listen(process.env.PORT || 3000, function listening() {
     console.log('Listening on %d', server.address().port);
-
-    // for (var i = 0; i < streams.length; i++) {
-    //     const stream = streams[i];
-    //     stream.backupExec = nginx.run(stream.backupConf);
-    // }
-
-    // TODO restart nginx so we capture publish events
 });
-
-// notify {"app":"ingest","flashver":"...","swfurl":"","tcurl":"rtmp://rtmp1.abnsat.com/ingest","pageurl":"","addr":"107.1.139.34","clientid":"1","call":"publish","name":"v1zos2fgbhrir289","type":"live"}
-// notify {"app":"ingest","flashver":"...","swfurl":"","tcurl":"rtmp://rtmp.abnsat.com:1935/ingest/","pageurl":"","addr":"12.201.46.14","clientid":"66","call":"publish","name":"vtbkr2rhrlhvvda9","type":"live"}
-
-
-// {
-//     name: 'arabic',
-//     primaryConf: __dirname + '/conf/nginx-arabic-primary.conf',
-//     primaryExec: null,
-//     backupConf: __dirname + '/conf/nginx-arabic-backup.conf',
-//     backupExec: null,
-// },
-// {
-//     name: 'trinity',
-//     primaryConf: __dirname + '/conf/nginx-trinity-primary.conf',
-//     primaryExec: null,
-//     backupConf: __dirname + '/conf/nginx-trinity-backup.conf',
-//     backupExec: null,
-// },
-// {
-//     name: 'abnsama',
-//     primaryConf: __dirname + '/conf/nginx-abnsama-primary.conf',
-//     primaryExec: null,
-//     backupConf: __dirname + '/conf/nginx-abnsama-backup.conf',
-//     backupExec: null,
-// }
