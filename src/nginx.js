@@ -30,7 +30,7 @@ function run(port, source) {
   const conf = template.replace('{{port}}', port).replace('{{source}}', source);
   const tmpobj = tmp.fileSync();
   fs.writeFileSync(tmpobj.name, conf);
-  const exec = spawn(nginxPath, ['-c', conf]);
+  const exec = spawn(nginxPath, ['-c', tmpobj.name]);
 
   exec.on('close', code => console.log('close: ', code));
   exec.on('error', error => console.error('error: ', error));
