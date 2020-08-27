@@ -13,7 +13,6 @@ const streams = [
     {
         id: 1,
         name: 'Arabic - AirBox',
-        active: true,
         port: 3001,
         source: 'rtmp://localhost/ingest/v1zos2fgbhrir289',
         exec: null,
@@ -21,7 +20,6 @@ const streams = [
     {
         id: 2,
         name: 'Trinity - AirBox',
-        active: false,
         port: 3002,
         source: 'rtmp://localhost/ingest/zehkcgjtbdblut09',
         exec: null,
@@ -29,7 +27,6 @@ const streams = [
     {
         id: 3,
         name: 'Farsi - AirBox',
-        active: false,
         port: 3003,
         source: 'rtmp://localhost/ingest/wxpkr2rgbfjqvda9',
         exec: null,
@@ -37,7 +34,6 @@ const streams = [
     {
         id: 4,
         name: 'Arabic - Live',
-        active: false,
         port: 3001,
         source: 'rtmp://localhost/ingest/live',
         exec: null,
@@ -45,7 +41,6 @@ const streams = [
     {
         id: 5,
         name: 'Trinity - Live',
-        active: false,
         port: 3002,
         source: 'rtmp://localhost/ingest/live',
         exec: null,
@@ -53,7 +48,6 @@ const streams = [
     {
         id: 6,
         name: 'Farsi - Live',
-        active: false,
         port: 3003,
         source: 'rtmp://localhost/ingest/live',
         exec: null,
@@ -64,7 +58,7 @@ app.get('/streams', function (req, res) {
     res.json(streams.map(stream => ({
         id: stream.id,
         name: stream.name,
-        active: stream.active,
+        active: stream.exec && stream.exec.exitCode === null,
     })));
 });
 
@@ -90,7 +84,13 @@ app.post('/streams/:streamId/stop', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-    res.render('pages/index', {streams});
+    res.render('pages/index', {
+        streams: streams.map(stream => ({
+            id: stream.id,
+            name: stream.name,
+            active: stream.exec && stream.exec.exitCode === null,
+        })),
+    });
 });
 
 server.listen(process.env.PORT || 3000, function listening() {

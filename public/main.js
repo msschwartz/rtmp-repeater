@@ -1,31 +1,18 @@
-// const renderStreams = streams => {
-//     if (!streams || streams.length === 0) {
-//         $('#active_streams').html('empty');
-//     } else {
-//         var html = '';
-//         for (var i = 0; i < streams.length; i++) {
-//             const stream = streams[i];
-//             const start = new Date(stream.start);
-//             const end = new Date(stream.end);
-//             var template = $('#stream-template').html();
-//             template = template.replace(/{{key}}/g, stream.key);
-//             template = template.replace(/{{source}}/g, stream.source);
-//             template = template.replace(/{{destination}}/g, stream.destination);
-//             template = template.replace(/{{bitrate}}/g, stream.currentKbps);
-//             template = template.replace(/{{start}}/g, start.toLocaleString('en-US', {timeStyle: 'short'}));
-//             template = template.replace(/{{end}}/g, end.toLocaleString('en-US', {timeStyle: 'short'}));
-//             html = html + template;
-//         }
-//         $('#active_streams').html(html);
-//     }
-// };
-
 let pollTimeout = null;
 
 const poll = () => {
     clearTimeout(pollTimeout);
     $.get('/streams', data => {
-        // console.log(data);
+        data.forEach(stream => {
+            const $stream = $(`.stream[data-stream-id=${stream.id}]`);
+            if (stream.active) {
+                $stream.addClass('panel-success').removeClass('panel-warning');
+                $stream.find('.status').html('active');
+            } else {
+                $stream.addClass('panel-warning').removeClass('panel-success');
+                $stream.find('.status').html('stopped');
+            }
+        });
         pollTimeout = setTimeout(poll, 3000);
     });
 };
