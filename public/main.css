@@ -1,0 +1,28 @@
+/* .stream {
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-size: 12px;
+    background-image: url('/images/stripes.gif');
+    background-position: 0px 0px;
+    background-repeat: repeat-x;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #fff;
+    animation: animatedBackground 20s linear infinite;
+}
+.stream .info {
+    flex-shrink: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.stream button {
+    flex-grow: 0;
+}
+@keyframes animatedBackground {
+    from { background-position: 0 0; }
+    to { background-position: 1000px 0; }
+} */
