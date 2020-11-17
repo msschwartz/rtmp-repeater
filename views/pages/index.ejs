@@ -26,12 +26,48 @@
                         <span class="status badge">-</span>
                     </div>
                     <div class="panel-body">
-                        <button class="btn btn-success">Start</button>
-                        <button class="btn btn-danger">Stop</button>
+                        <%if (!stream.destination) { %>
+                            <button class="btn btn-success">Start</button>
+                            <button class="btn btn-danger">Stop</button>
+                        <% } %>
+                        <%if (stream.destination) { %>
+                            <pre><%= stream.source %>
+<%= stream.destination %></pre>
+                            <button class="btn btn-danger">Delete</button>
+                        <% } %>
                     </div>
                 </div>
             </div>
             <% }); %>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-xs-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Create Stream
+                    </div>
+                    <div class="panel-body create-stream">
+                        <div class="form-group">
+                            <label>Source</label>
+                            <input class="form-control" name="source" />
+                        </div>
+                        <div class="form-group">
+                            <label>Destination</label>
+                            <input class="form-control" name="destination" />
+                        </div>
+                        <button class="btn btn-success">Start</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-8">
+                <ul>
+                    <li>Arabic: rtmp://rtmp.abnsat.com/live/arabic</li>
+                    <li>Trinity: rtmp://rtmp.abnsat.com/live/trinity</li>
+                    <li>Farsi (KoH): rtmp://rtmp.abnsat.com/live/abnsama</li>
+                    <li>ABNPARS: rtmp://rtmp.abnsat.com/ingest/abnpars</li>
+                </ul>
+            </div>
         </div>
         <hr>
         <div class="row">

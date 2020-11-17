@@ -1,7 +1,9 @@
 require('dotenv').config({path: __dirname + '/.env'});
 const express = require('express');
 const http = require('http');
+const nanoid = require('nanoid').nanoid;
 const nginx = require('./src/nginx');
+const ffmpeg = require('./src/ffmpeg');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,7 +11,7 @@ const server = http.createServer(app);
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 
-const streams = [
+let streams = [
     {
         id: 1,
         name: 'Arabic - AirBox',
@@ -59,6 +61,46 @@ app.get('/streams', function (req, res) {
         id: stream.id,
         name: stream.name,
         active: stream.exec && stream.exec.exitCode === null,
+        source: stream.source,
+        destination: stream.destination,
+    })));
+});
+
+app.post('/streams', function (req, res) {
+    const {source, destination} = req.query;
+
+    streams.push({
+        id: nanoid(),
+        name: 'Custom',
+        source,
+        destination,
+        exec: ffmpeg.run(source, destination),
+    });
+
+    res.send('OK');
+});
+
+app.delete('/streams/:streamId', function (req, res) {
+    const index = streams.findIndex(s => String(s.id) === String(req.params.streamId));
+
+    if (index !== -1) {
+        const stream = streams[index];
+
+        if (stream && stream.exec) {
+            stream.exec.kill();
+            stream.exec = null;
+        }
+
+        streams = [
+            ...streams.slice(0, index),
+            ...streams.slice(index + 1),
+        ];
+    }
+
+    res.json(streams.map(stream => ({
+        id: stream.id,
+        name: stream.name,
+        active: stream.exec && stream.exec.exitCode === null,
     })));
 });
 
@@ -89,6 +131,8 @@ app.get('/', function (req, res) {
             id: stream.id,
             name: stream.name,
             active: stream.exec && stream.exec.exitCode === null,
+            source: stream.source,
+            destination: stream.destination,
         })),
     });
 });
