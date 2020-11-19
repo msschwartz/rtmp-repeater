@@ -10,6 +10,8 @@ function run(source, destination) {
     '-loglevel', 'warning',
     '-re',
     '-i', source,
+    '-vcodec', 'copy',
+    '-acodec', 'copy',
     '-f', 'flv',
     destination,
   ];
