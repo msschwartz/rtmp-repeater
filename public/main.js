@@ -42,7 +42,7 @@ const stopStream = function () {
 const createStream = function () {
     const source = $(this).parents('.create-stream').find('[name="source"]').val();
     const destination = $(this).parents('.create-stream').find('[name="destination"]').val();
-    $.post(`/streams?source=${source}&destination=${destination}`);
+    $.post(`/streams?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}`);
     location.reload();
 };
 
